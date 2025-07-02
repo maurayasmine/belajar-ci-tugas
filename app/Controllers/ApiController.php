@@ -1,0 +1,120 @@
+<?php
+
+namespace App\Controllers;
+
+use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\RESTful\ResourceController;
+use App\Models\TransactionModel;
+use App\Models\TransactionDetailModel;
+use App\Models\UserModel;
+
+
+class ApiController extends ResourceController
+{
+    protected $apiKey;
+    protected $user;
+    protected $transaction;
+    protected $transaction_detail;
+
+    public function __construct()
+    {
+        $this->apiKey = getenv('API_KEY'); // ambil dari .env
+        $this->user = new UserModel();
+        $this->transaction = new TransactionModel();
+        $this->transaction_detail = new TransactionDetailModel();
+    }
+
+    public function index()
+    {
+        $key = $this->request->getHeaderLine('Key');
+        $data = [
+            'results' => [],
+            'status' => ['code' => 401, 'description' => 'Unauthorized'],
+        ];
+
+        if ($key && $key === $this->apiKey) {
+            $penjualan = $this->transaction->findAll();
+
+            foreach ($penjualan as &$pj) {
+                $pj['details'] = $this->transaction_detail
+                    ->where('transaction_id', $pj['id'])
+                    ->findAll();
+            }
+
+            $data['results'] = $penjualan;
+            $data['status'] = ['code' => 200, 'description' => 'OK'];
+        }
+
+        return $this->respond($data);
+    }
+
+
+
+    /**
+     * Return the properties of a resource object.
+     *
+     * @param int|string|null $id
+     *
+     * @return ResponseInterface
+     */
+    public function show($id = null)
+    {
+        //
+    }
+
+    /**
+     * Return a new resource object, with default properties.
+     *
+     * @return ResponseInterface
+     */
+    public function new()
+    {
+        //
+    }
+
+    /**
+     * Create a new resource object, from "posted" parameters.
+     *
+     * @return ResponseInterface
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Return the editable properties of a resource object.
+     *
+     * @param int|string|null $id
+     *
+     * @return ResponseInterface
+     */
+    public function edit($id = null)
+    {
+        //
+    }
+
+    /**
+     * Add or update a model resource, from "posted" properties.
+     *
+     * @param int|string|null $id
+     *
+     * @return ResponseInterface
+     */
+    public function update($id = null)
+    {
+        //
+    }
+
+    /**
+     * Delete the designated resource object from the model.
+     *
+     * @param int|string|null $id
+     *
+     * @return ResponseInterface
+     */
+    public function delete($id = null)
+    {
+        //
+    }
+}
